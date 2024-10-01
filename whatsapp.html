@@ -1,1 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Formulario para enviar mensaje por WhatsApp</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: transparent; /* Fondo transparente */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #formulario-wrapper {
+      background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente */
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    select {
+      display: block;
+      margin-bottom: 20px;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --boton-whatsapp-color: #25d366; /* Color predeterminado del botón de WhatsApp */
+      --boton-whatsapp-color-hover: #128c7e; /* Color al pasar el puntero del mouse sobre el botón */
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: var(--boton-whatsapp-color); /* Utilizando la variable para el color */
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: var(--boton-whatsapp-color-hover); /* Utilizando la variable para el color */
+    }
+  </style>
+</head>
+<body>
+
+<div id="formulario-wrapper">
+  <form onsubmit="return false;">
+    <label for="nombre">Nombre y apellido de los asistentes:</label>
+    <input type="text" id="nombre" name="nombre">
+    <label for="asistencia">¿Asistirás a la fiesta?</label>
+    <select id="asistencia" name="asistencia">
+      <option value="ninguna" selected>Seleccione</option>
+      <option value="si">Sí, quiero confirmar asistencia.</option>
+      <option value="no">No, no puedo /podemos.</option>
+    </select>
+
+    <!-- Agregar un div donde se mostrará el botón de WhatsApp -->
+    <div id="boton-whatsapp"></div>
+  </form>
+</div>
+
+<script>
+  function crearEnlace() {
+    var nombre = document.getElementById("nombre").value;
+    var asistencia = document.getElementById("asistencia").value;
+
+    var mensaje = "";
+
+    if (asistencia === "si") {
+      mensaje = "Hola, quiero confirmar asistencia de " + nombre + " a la fiesta. ¡Nos vemos allí!";
+    } else if (asistencia === "no") {
+      mensaje = "Hola, quiero avisar que " + nombre + " no podré / podremos asistir a la fiesta. ¡Espero / esperamos verlos la próxima vez!";
+    } else if (asistencia === "ninguna") {
+      mensaje = "Hola, mi nombre es " + nombre + "...";
+    }
+
+    var telefono = "541169989195‬"; // Cambiar por el número de WhatsApp del contacto
+
+    var url = "https://api.whatsapp.com/send?phone=" + telefono + "&text=" + encodeURIComponent(mensaje);
+
+    var boton = document.createElement("button");
+    boton.innerHTML = "Enviar mensaje a WhatsApp";
+    boton.addEventListener("click", function() {
+      window.open(url, "_blank");
+    });
+
+    var divBoton = document.getElementById("boton-whatsapp");
+    divBoton.innerHTML = "";
+    divBoton.appendChild(boton);
+  }
+
+  document.getElementById("asistencia").addEventListener("change", crearEnlace);
+</script>
+
+</body>
+</html>
+
 
