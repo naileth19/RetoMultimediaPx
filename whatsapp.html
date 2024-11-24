@@ -7,7 +7,10 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: transparent; /* Fondo transparente */
+      background-image: url('https://example.com/tu-imagen.jpg'); /* URL de la imagen de fondo */
+      background-size: cover; /* Ajustar la imagen al tamaño completo */
+      background-position: center; /* Centrar la imagen */
+      background-repeat: no-repeat; /* No repetir la imagen */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -40,13 +43,13 @@
     }
 
     :root {
-      --boton-whatsapp-color: #25d366; /* Color predeterminado del botón de WhatsApp */
-      --boton-whatsapp-color-hover: #128c7e; /* Color al pasar el puntero del mouse sobre el botón */
+      --boton-whatsapp-color: #25d366;
+      --boton-whatsapp-color-hover: #128c7e;
     }
 
     button {
       padding: 10px 20px;
-      background-color: var(--boton-whatsapp-color); /* Utilizando la variable para el color */
+      background-color: var(--boton-whatsapp-color);
       color: #fff;
       border: none;
       border-radius: 4px;
@@ -56,7 +59,7 @@
     }
 
     button:hover {
-      background-color: var(--boton-whatsapp-color-hover); /* Utilizando la variable para el color */
+      background-color: var(--boton-whatsapp-color-hover);
     }
   </style>
 </head>
@@ -70,10 +73,9 @@
     <select id="asistencia" name="asistencia">
       <option value="ninguna" selected>Seleccione</option>
       <option value="si">Sí, quiero confirmar asistencia.</option>
-      <option value="no">No, no puedo /podemos.</option>
+      <option value="no">No, no puedo / podemos.</option>
     </select>
 
-    <!-- Agregar un div donde se mostrará el botón de WhatsApp -->
     <div id="boton-whatsapp"></div>
   </form>
 </div>
@@ -93,7 +95,7 @@
       mensaje = "Hola, mi nombre es " + nombre + "...";
     }
 
-    var telefono = "541169989195‬"; // Cambiar por el número de WhatsApp del contacto
+    var telefono = "541169989195‬";
 
     var url = "https://api.whatsapp.com/send?phone=" + telefono + "&text=" + encodeURIComponent(mensaje);
 
@@ -113,5 +115,4 @@
 
 </body>
 </html>
-
 
