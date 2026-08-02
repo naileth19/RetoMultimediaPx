@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Micrófono — English Career Coach AI</title>
+<style>
+  :root { --primario: #4F46E5; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, sans-serif;
+    background: #F7F8FC;
+    color: #1F2937;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(79,70,229,0.15);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    max-width: 360px;
+    width: 100%;
+  }
+  h1 { font-size: 1.05rem; margin: 0 0 .75rem; color: #3730A3; }
+  p { color: #6B7280; font-size: .9rem; margin: 0 0 1.25rem; }
+  .btn-mic {
+    width: 84px; height: 84px; border-radius: 50%;
+    border: none; background: linear-gradient(135deg, #4F46E5, #3730A3);
+    color: #fff; font-size: 2rem; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(79,70,229,0.35);
+  }
+  .btn-mic.grabando {
+    background: linear-gradient(135deg, #EF4444, #B91C1C);
+    animation: pulso 1.4s infinite;
+  }
+  @keyframes pulso {
+    0%   { box-shadow: 0 0 0 0 rgba(239,68,68,.5); }
+    70%  { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
+    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  }
+  #transcripcion {
+    margin-top: 1.25rem;
+    min-height: 40px;
+    font-size: .95rem;
+    color: #374151;
+  }
+  #estado { font-size: .8rem; color: #9CA3AF; margin-top: .5rem; }
+  .btn-enviar {
+    margin-top: 1rem;
+    background: #10B981;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .6rem 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎙️ Grabando tu respuesta</h1>
+    <p>Presioná el micrófono, respondé en inglés y presionalo de nuevo para terminar.</p>
+    <button id="btnMic" class="btn-mic">🎤</button>
+    <p id="estado">Esperando...</p>
+    <div id="transcripcion"></div>
+    <button id="btnEnviar" class="btn-enviar">Enviar y cerrar</button>
+  </div>
+
+<script>
+  /**
+   * ================================================================
+   *  VOICE BRIDGE — English Career Coach AI
+   * ================================================================
+   *  Página independiente (fuera del sandbox de Apps Script) que
+   *  captura voz con SpeechRecognition y devuelve el texto final a
+   *  la ventana que la abrió (window.opener) vía postMessage.
+   *
+   *  Se aloja en un hosting estático simple (ej. GitHub Pages) para
+   *  que el navegador la trate como un origen de nivel superior con
+   *  permisos completos, evitando la restricción de micrófono que
+   *  Google Apps Script impone en su iframe interno.
+   * ================================================================
+   */
+
+  const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btnMic = document.getElementById('btnMic');
+  const btnEnviar = document.getElementById('btnEnviar');
+  const elTranscripcion = document.getElementById('transcripcion');
+  const elEstado = document.getElementById('estado');
+
+  let reconocimiento = null;
+  let grabando = false;
+  let transcripcionFinal = '';
+
+  if (!SpeechRecognitionAPI) {
+    elEstado.textContent = 'Tu navegador no soporta reconocimiento de voz. Probá con Chrome.';
+    btnMic.disabled = true;
+  }
+
+  btnMic.addEventListener('click', function () {
+    if (grabando) {
+      reconocimiento.stop();
+      return;
+    }
+    iniciar();
+  });
+
+  function iniciar() {
+    transcripcionFinal = '';
+    elTranscripcion.textContent = '';
+    btnEnviar.style.display = 'none';
+
+    reconocimiento = new SpeechRecognitionAPI();
+    reconocimiento.lang = 'en-US';
+    reconocimiento.continuous = true;
+    reconocimiento.interimResults = true;
+
+    reconocimiento.onresult = function (event) {
+      let interino = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const texto = event.results[i][0].transcript;
+        if (event.results[i].isFinal) transcripcionFinal += texto + ' ';
+        else interino += texto;
+      }
+      elTranscripcion.textContent = (transcripcionFinal + interino).trim();
+    };
+
+    reconocimiento.onerror = function (event) {
+      elEstado.textContent = 'Error: ' + event.error + '. Verificá el permiso de micrófono del navegador.';
+      grabando = false;
+      btnMic.classList.remove('grabando');
+      btnMic.textContent = '🎤';
+    };
+
+    reconocimiento.onend = function () {
+      grabando = false;
+      btnMic.classList.remove('grabando');
+      btnMic.textContent = '🎤';
+      elEstado.textContent = transcripcionFinal ? 'Listo. Revisá y enviá.' : 'No se detectó voz. Probá de nuevo.';
+      if (transcripcionFinal.trim()) {
+        btnEnviar.style.display = 'inline-block';
+      }
+    };
+
+    reconocimiento.start();
+    grabando = true;
+    btnMic.classList.add('grabando');
+    btnMic.textContent = '⏹️';
+    elEstado.textContent = 'Escuchando...';
+  }
+
+  btnEnviar.addEventListener('click', function () {
+    if (window.opener) {
+      window.opener.postMessage({
+        type: 'ECC_VOICE_RESULT',
+        transcript: transcripcionFinal.trim()
+      }, '*');
+    }
+    window.close();
+  });
+
+  // Si el usuario cierra la ventana sin enviar, no se manda nada
+  // (la app principal simplemente sigue esperando).
+</script>
+</body>
+</html>
